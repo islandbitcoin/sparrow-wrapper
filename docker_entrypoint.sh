@@ -1,3 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
-exec tini hello-world
+set -e
+
+export SPARROW_NETWORK=mainnet
+
+while true; do sleep 100; done 
+
+exec tini sparrow -h

@@ -1,32 +1,32 @@
 # Example written in yaml (toml and json are also acceptable)
 
 # The package identifier used by the OS. This must be unique amongst all other known packages
-id: hello-world 
+id: sparrow 
  # A human readable service title
-title: "Hello World"
+title: "Sparrow"
 # Service version - accepts up to four digits, where the last confirms to revisions necessary for EmbassyOS - see documentation: https://github.com/Start9Labs/emver-rs. This value will change with each release of the service. 
-version: 1.0.0.0
+version: 1.7.0
 # Release notes for the update - can be a string, paragraph or URL
-release-notes: "Revamped for EmabssyOS 0.3.2"
+release-notes: "Initial Release for EmabssyOS 0.3.2"
 # The type of license for the project. Include the LICENSE in the root of the project directory. A license is required for a Start9 package.
 license: mit
 # The Start9 wrapper repository URL for the package. This repo contains the manifest file (this), any scripts necessary for configuration, backups, actions, or health checks (more below). This key must exist. But could be embedded into the source repository. 
-wrapper-repo: "https://github.com/Start9Labs/hello-world-wrapper"
+wrapper-repo: "https://github.com/Start9Labs/sparrow-wrapper"
 # The original project repository URL. There is no upstream repo in this example
-upstream-repo: "https://github.com/Start9Labs/hello-world"
+upstream-repo: "https://github.com/sparrowwallet/sparrow"
 # URL to the support site / channel for the project. This key can be omitted if none exists, or it can link to the original project repository issues.
-support-site: "https://docs.start9.com/"
+support-site: "https://github.com/sparrowwallet/sparrow/issues"
 # URL to the marketing site for the project. This key can be omitted if none exists, or it can link to the original project repository. 
-marketing-site: "https://start9.com/"
+marketing-site: "https://sparrowwallet.com/"
 # The series of commands to build the project into an s9pk for arm64/v8. In this case we are using a Makefile with the simple build command "make".
 build: ["make"]
 # Human readable descriptors for the service. These are used throughout the EmbassyOS user interface, primarily in the marketplace.
 description:
   # This is the first description visible to the user in the marketplace.
-  short: Example service
+  short: Desktop Bitcoin Wallet focused on security and privacy. Free and open source. Only sparrow-cli available on embassyOS.
   # This description will display with additional details in the service's individual marketplace page
   long: |
-    Hello World is a bare-bones service that launches a web interface to say "Hello World", and nothing more.
+    Sparrow is a modern desktop Bitcoin wallet application supporting most hardware wallets and built on common standards such as PSBT, with an emphasis on transparency and usability.
 # These assets are static files necessary for packaging the service for Start9 (into an s9pk). Each value is a path to the specified asset. If an asset is missing from this list, or otherwise denoted, it will be defaulted to the values denoted below. 
 assets:
   # Default = LICENSE.md
@@ -53,8 +53,13 @@ main:
     main: /root
 # Health checks 
 health-checks: {}
-config: ~
-properties: ~
+config: 
+  get:
+    type: script
+  set:
+    type: script
+properties:
+  type: script
 #  type: script
 # This denotes any data, asset, or pointer volumes that should be connected when the "docker run" command is invoked
 volumes:
@@ -66,9 +71,9 @@ interfaces:
   # This key is the internal name that the OS will use to configure the interface
   main:
     # A human readable name for display in the UI
-    name: User Interface
+    name: Sparrow Wallet Interface
     # A descriptive description of what the interface does
-    description: A simple user interface that is expected to display the text "Hello Word"
+    description: Not in use for this version
     tor-config:
     # Port mappings are from the external port to the internal container port
       port-mapping:
@@ -79,12 +84,37 @@ interfaces:
         ssl: true
         internal: 80
     # Denotes if the service has a user interface to display
-    ui: true
+    ui: false
     # Denotes the protocol specifications used by this interface
     protocols:
       - tcp
       - http
-dependencies: {}
+dependencies: 
+  bitcoind:
+    version: ">=0.22.0 <=24.0.0"
+    requirement:
+      type: "opt-in"
+      how: Can alternatively configure proxy or bitcoin core  node.
+    description: Used to subscribe to new block events from a full archival node.
+    config:
+      check: 
+        type: script
+      auto-configure:
+        type: script
+  btc-rpc-proxy:
+    version: ">=0.3.2.5 <0.4.0"
+    requirement:
+      type: "opt-out"
+      how: Can alternatively configure proxy or bitcoin core  node.
+    description: Used for RPC permissioning.
+    config:
+      check:
+        type: script
+      auto-configure:
+        type: script
+alerts:
+  start: |
+    NOTE: This service has command-line use only available on your Embassy. 
 # Specifies how backups should be run for this service. The default EmbassyOS provided option is to use the duplicity backup library on a system image (compat)
 backup:
   create:
@@ -96,7 +126,7 @@ backup:
     system: true 
     # The executable to run the command to begin the backup create process
     entrypoint: compat 
-    # Arguments to pass into the entrypoint executable. In this example, the full command run will be: `compat duplicity hello-world /mnt/backup /root/data`
+    # Arguments to pass into the entrypoint executable. In this example, the full command run will be: `compat duplicity sparrow /mnt/backup /root/data`
     args:
       - duplicity
       - create

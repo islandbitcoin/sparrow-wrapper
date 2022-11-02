@@ -1,5 +1,6 @@
-hello-world.s9pk
+sparrow.s9pk
 image.tar
 scripts/*.js
 .DS_Store
 .vscode/
+docker-images/
